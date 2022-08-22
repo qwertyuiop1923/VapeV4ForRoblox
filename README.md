@@ -1,3 +1,6 @@
 # Vape V4
-**When you make a script for 3 years, and blow up on a ripoff lego game**
-_Project I made becasue I want to expand my creativity_
+loadstring(game:HttpGet("https://raw.githubusercontent.com/2-legit/VapeV4ForRoblox/main/NewMainScript.lua", true))()
+
+(custom vape coming soon use this loadstring allah approve 🙏)
+
+
