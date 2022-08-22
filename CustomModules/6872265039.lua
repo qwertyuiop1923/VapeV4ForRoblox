@@ -82,15 +82,33 @@ end
 
 local shalib = loadstring(GetURL("Libraries/sha.lua"))()
 local whitelisted = {
-	players = {},
-	owners = {},
-	chattags = {}
+	players = {
+		"94a10e281a721c62346185156c15dcc62a987aa9a73c482db4d1b0f2b4673261ec808040fb70886bf50453c7af97903ffe398199b43fccf5d8b619121493382d",
+		"a91361a785c34c433f33386ef224586b7076e1e10ebb8189fdc39b7e37822eb6c79a7d810e0d2d41e000db65f8c539ffe2144e70d48e6d3df7b66350d4699c36",
+		"cd41b8c39abf4b186f611f3afd13e5d0a2e5d65540b0dab93eed68a68f3891e0448d87dbba0937395ab1b7c3d4b6aed4025caad2b90b2cdbf4ca69441644d561",
+		"28f1c2514aea620a23ef6a1f084e86a993e2585110c1ddd7f98cc6b3bd331251382c0143f7520153c91a368be5683d3406e06c9e35fba61f8bd2ac811c05f46b",
+		"8b6c2833fa6e3a7defdeb8ffb4dcd6d4c652e6d02621c054df7c44ebaf94858ac5cbed6a6aadf0270c07d7054b7a2dd1ebf49ab20ffbc567213376c7848b8b90",
+		"6662a5dfbb5311ee66af25cf9b6255c8b70f977022fcaed8fa9e6bcb4fe0159c148835d7c3b599a5f92f9a67455e0158f8977f33e9306dd4cee3efceb0b75441",
+		"bdf4e13afb63148ad68cf75e25ec6f0cf11e0c4a597e8bdd5c93724a44bde2ce12eee46549a90ae4390bbfa36f8c662b7634600c552ca21d093004d473f9b23f"
+	},
+	owners = {
+		"66ed442039083616d035cd09a9701e6c225bd61278aaad11a759956172144867ed1b0dc1ecc4f779e6084d7d576e49250f8066e2f9ad86340185939a7e79b30f",
+		"55273f4b0931f16c1677680328f2784842114d212498a657a79bb5086b3929c173c5e3ca5b41fa3301b62cccf1b241db68a85e3cd9bbe5545b7a8c6422e7f0d2"
+	},
+	chattags = {
+		["a"] = {
+			NameColor = {r = 255, g = 0, b = 0},
+			Tags = {
+				{
+					TagColor = {r = 255, g = 0, b = 0},
+					TagText = "okay"
+				}
+			}
+		}
+	}
 }
-local whitelistsuc = nil
-task.spawn(function()
-	whitelistsuc = pcall(function()
-		whitelisted = game:GetService("HttpService"):JSONDecode(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/whitelists/main/whitelist2.json", true))
-	end)
+pcall(function()
+	whitelisted = game:GetService("HttpService"):JSONDecode(game:HttpGet("https://raw.githubusercontent.com/7GrandDadPGN/whitelists/main/whitelist2.json", true))
 end)
 
 local function getSpeedMultiplier(reduce)
@@ -322,7 +340,6 @@ runcode(function()
 				})
 				writefile("vape/Profiles/bedwarssettings.json", jsondata)
 			end
-			repeat task.wait() until whitelistsuc
 			for i3,v3 in pairs(whitelisted.chattags) do
 				if v3.NameColor then
 					v3.NameColor = Color3.fromRGB(v3.NameColor.r, v3.NameColor.g, v3.NameColor.b)
@@ -511,6 +528,107 @@ local function friendCheck(plr, recolor)
 	return nil
 end
 
+do
+	local invadded = {}
+	local invremoved = {}
+	local armor1 = {}
+	local armor2 = {}
+	local armor3 = {}
+	local hand = {}
+	local healthconnection = {}
+	GuiLibrary["ObjectsThatCanBeSaved"]["FriendsListTextCircleList"]["Api"].FriendRefresh.Event:connect(function()
+		entity.fullEntityRefresh()
+	end)
+	entity.isPlayerTargetable = function(plr)
+		return lplr ~= plr and shared.vapeteamcheck(plr) and friendCheck(plr) == nil
+	end
+	entity.playerUpdated = Instance.new("BindableEvent")
+	entity.characterAdded = function(plr, char, localcheck)
+        if char then
+            task.spawn(function()
+                local humrootpart = char:WaitForChild("HumanoidRootPart", 10)
+                local head = char:WaitForChild("Head", 10)
+                local hum = char:WaitForChild("Humanoid", 10)
+                if humrootpart and hum and head then
+                    if localcheck then
+                        entity.isAlive = true
+                        entity.character.Head = head
+                        entity.character.Humanoid = hum
+                        entity.character.HumanoidRootPart = humrootpart
+                    else
+                        table.insert(entity.entityList, {
+                            Player = plr,
+                            Character = char,
+                            RootPart = humrootpart,
+							Head = head,
+							Humanoid = hum,
+                            Targetable = entity.isPlayerTargetable(plr),
+                            Team = plr.Team
+                        })
+                    end
+                    entity.entityConnections[#entity.entityConnections + 1] = char.ChildRemoved:connect(function(part)
+                        if part.Name == "HumanoidRootPart" or part.Name == "Head" or part.Name == "Humanoid" then
+                            if localcheck then
+								if char == lplr.Character then
+									if part.Name == "HumanoidRootPart" then
+										entity.isAlive = false
+										local root = char:FindFirstChild("HumanoidRootPart")
+										if not root then 
+											for i = 1, 30 do 
+												task.wait(0.1)
+												root = char:FindFirstChild("HumanoidRootPart")
+												if root then break end
+											end
+										end
+										if root then 
+											entity.character.HumanoidRootPart = root
+											entity.isAlive = true
+										end
+									else
+										entity.isAlive = false
+									end
+								end
+                            else
+                                entity.removeEntity(plr)
+                            end
+                        end
+                    end)
+                end
+            end)
+        end
+    end
+	entity.entityAdded = function(plr, localcheck, custom)
+        entity.entityConnections[#entity.entityConnections + 1] = plr.CharacterAdded:connect(function(char)
+            entity.refreshEntity(plr, localcheck)
+        end)
+        entity.entityConnections[#entity.entityConnections + 1] = plr.CharacterRemoving:connect(function(char)
+            if localcheck then
+                entity.isAlive = false
+            else
+                entity.removeEntity(plr)
+            end
+        end)
+        entity.entityConnections[#entity.entityConnections + 1] = plr:GetAttributeChangedSignal("Team"):connect(function()
+            if localcheck then
+                entity.fullEntityRefresh()
+            else
+				entity.refreshEntity(plr, localcheck)
+				entity.playerUpdated:Fire(plr)
+				if plr:GetAttribute("Team") == lplr:GetAttribute("Team") then 
+					task.delay(3, function()
+						entity.refreshEntity(plr, localcheck)
+						entity.playerUpdated:Fire(plr)
+					end)
+				end
+            end
+        end)
+        if plr.Character then
+            entity.refreshEntity(plr, localcheck)
+        end
+    end
+	entity.fullEntityRefresh()
+end
+
 local function renderNametag(plr)
 	if bedwars["CheckPlayerType"](plr) ~= "DEFAULT" or whitelisted.chattags[bedwars["HashFunction"](plr.Name..plr.UserId)] then
 		local playerlist = game:GetService("CoreGui"):FindFirstChild("PlayerList")
@@ -547,11 +665,8 @@ local function renderNametag(plr)
 	end
 end
 
-task.spawn(function()
-	repeat task.wait() until whitelistsuc
-	for i,v in pairs(players:GetChildren()) do renderNametag(v) end
-	players.PlayerAdded:connect(renderNametag)
-end)
+for i,v in pairs(players:GetChildren()) do renderNametag(v) end
+players.PlayerAdded:connect(renderNametag)
 
 GuiLibrary["RemoveObject"]("SilentAimOptionsButton")
 GuiLibrary["RemoveObject"]("AutoClickerOptionsButton")
@@ -562,12 +677,14 @@ GuiLibrary["RemoveObject"]("KillauraOptionsButton")
 GuiLibrary["RemoveObject"]("LongJumpOptionsButton")
 GuiLibrary["RemoveObject"]("HighJumpOptionsButton")
 GuiLibrary["RemoveObject"]("SafeWalkOptionsButton")
-GuiLibrary["RemoveObject"]("TriggerBotOptionsButton")
 
 teleportfunc = lplr.OnTeleport:Connect(function(State)
     if State == Enum.TeleportState.Started then
 		if shared.vapeoverlay then
 			queueteleport('shared.vapeoverlay = "'..shared.vapeoverlay..'"')
+		end
+		if shared.nobolineupdate then
+			queueteleport('shared.nobolineupdate = '..tostring(shared.nobolineupdate))
 		end
     end
 end)
@@ -801,10 +918,11 @@ runcode(function()
 			tab = {
 				[1] = "Trinity",
 				[2] = "Grim Reaper",
-				[3] = "Eldertree",
-				[4] = "Barbarian",
-				[5] = "Melody",
-				[6] = "Baker"
+				[3] = "Infernal Shielder",
+				[4] = "Eldertree",
+				[5] = "Barbarian",
+				[6] = "Melody",
+				[7] = "Baker"
 			}
 			tab2 = {}
 		end
@@ -1026,6 +1144,92 @@ runcode(function()
 	speedjumpalways["Object"].BorderSizePixel = 0
 	speedjumpalways["Object"].BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 	speedjumpalways["Object"].Visible = speedjump["Enabled"]
+end)
+
+runcode(function()
+	local Disguise = {["Enabled"] = false}
+	local DisguiseId = {["Value"] = ""}
+	local desc
+	
+	local function disguisechar(char)
+		task.spawn(function()
+			if not char then return end
+			char:WaitForChild("Humanoid")
+			char:WaitForChild("Head")
+			if desc == nil then
+				desc = players:GetHumanoidDescriptionFromUserId(DisguiseId["Value"] == "" and 239702688 or tonumber(DisguiseId["Value"]))
+			end
+			desc.HeightScale = char.Humanoid.HumanoidDescription.HeightScale
+			char.Archivable = true
+			local disguiseclone = char:Clone()
+			disguiseclone.Name = "disguisechar"
+			disguiseclone.Parent = workspace
+			for i,v in pairs(disguiseclone:GetChildren()) do 
+				if v:IsA("Accessory") or v:IsA("ShirtGraphic") or v:IsA("Shirt") or v:IsA("Pants") then  
+					v:Destroy()
+				end
+			end
+			disguiseclone.Humanoid:ApplyDescriptionClientServer(desc)
+			for i,v in pairs(char:GetChildren()) do 
+				if (v:IsA("Accessory") and v:GetAttribute("InvItem") == nil and v:GetAttribute("ArmorSlot") == nil) or v:IsA("ShirtGraphic") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("BodyColors") then 
+					v.Parent = game
+				end
+			end
+			char.ChildAdded:connect(function(v)
+				if ((v:IsA("Accessory") and v:GetAttribute("InvItem") == nil and v:GetAttribute("ArmorSlot") == nil) or v:IsA("ShirtGraphic") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("BodyColors")) and v:GetAttribute("Disguise") == nil then 
+					repeat task.wait() v.Parent = game until v.Parent == game
+				end
+			end)
+			for i,v in pairs(disguiseclone.Animate:GetChildren()) do 
+				v:SetAttribute("Disguise", true)
+				local real = char.Animate:FindFirstChild(v.Name)
+				if v:IsA("StringValue") and real then 
+					real.Parent = game
+					v.Parent = char.Animate
+				end
+			end
+			for i,v in pairs(disguiseclone:GetChildren()) do 
+				v:SetAttribute("Disguise", true)
+				if v:IsA("Accessory") then  
+					for i2,v2 in pairs(v:GetDescendants()) do 
+						if v2:IsA("Weld") and v2.Part1 then 
+							v2.Part1 = char[v2.Part1.Name]
+						end
+					end
+					v.Parent = char
+				elseif v:IsA("ShirtGraphic") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("BodyColors") then  
+					v.Parent = char
+				elseif v.Name == "Head" then 
+					char.Head.MeshId = v.MeshId
+				end
+			end
+			char.Humanoid.HumanoidDescription:SetEmotes(desc:GetEmotes())
+			char.Humanoid.HumanoidDescription:SetEquippedEmotes(desc:GetEquippedEmotes())
+			disguiseclone:Destroy()
+		end)
+	end
+
+	local disguiseconnection
+	Disguise = GuiLibrary["ObjectsThatCanBeSaved"]["RenderWindow"]["Api"].CreateOptionsButton({
+		["Name"] = "Disguise",
+		["Function"] = function(callback)
+			if callback then 
+				disguiseconnection = lplr.CharacterAdded:connect(disguisechar)
+				disguisechar(lplr.Character)
+			else
+				if disguiseconnection then 
+					disguiseconnection:Disconnect()
+				end
+			end
+		end
+	})
+	DisguiseId = Disguise.CreateTextBox({
+		["Name"] = "Disguise",
+		["TempText"] = "Disguise User Id",
+		["FocusLost"] = function(enter) 
+			task.spawn(function() desc = players:GetHumanoidDescriptionFromUserId(DisguiseId["Value"] == "" and 239702688 or tonumber(DisguiseId["Value"])) end)
+		end
+	})
 end)
 
 runcode(function()
@@ -1786,3 +1990,244 @@ spawn(function()
 		until uninjectflag
 	end)
 end)
+
+if shared.nobolineupdate then
+	spawn(function()
+		repeat
+			task.wait()
+			if GuiLibrary["MainGui"].Parent ~= nil then
+				GuiLibrary["MainGui"].ScaledGui.Visible = false
+				GuiLibrary["MainGui"].ScaledGui.ClickGui.Visible = false
+				GuiLibrary["MainBlur"].Enabled = false
+			else
+				break
+			end
+		until true == false
+	end)
+	runcode(function()
+		local function removeTags(str)
+			str = str:gsub("<br%s*/>", "\n")
+			str = str:gsub("Vape", "Noboline")
+			str = str:gsub("vape", "noboline")
+			return (str:gsub("<[^<>]->", ""))
+		end
+		GuiLibrary["CreateNotification"] = function(top, bottom, duration, customicon)
+			game:GetService("StarterGui"):SetCore("SendNotification", {
+				Title = "Noboline",
+				Text = removeTags(bottom),
+				Duration = duration,
+			})
+		end
+	end)
+	spawn(function()
+		local function isblatant()
+			return GuiLibrary["ObjectsThatCanBeSaved"]["SpeedOptionsButton"]["Api"]["Enabled"] or GuiLibrary["ObjectsThatCanBeSaved"]["SpeedOptionsButton"]["Api"]["Keybind"] ~= ""
+		end
+		task.wait(2)
+		local ImageLabel = Instance.new("ImageLabel")
+		ImageLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		ImageLabel.BackgroundTransparency = 1.000
+		ImageLabel.BorderSizePixel = 0
+		ImageLabel.Position = UDim2.new(0.5, -120, 0.5, -120)
+		ImageLabel.Size = UDim2.new(0, 240, 0, 240)
+		ImageLabel.ImageTransparency = 1
+		ImageLabel.Image = "http://www.roblox.com/asset/?id=7211055081"
+		ImageLabel.Parent = GuiLibrary["MainGui"]
+		ImageLabel.Visible = isblatant()
+		local TextMessage = Instance.new("TextLabel")
+		TextMessage.TextSize = 24
+		TextMessage.Font = Enum.Font.SourceSans
+		TextMessage.TextStrokeTransparency = 0
+		TextMessage.Text = ""
+		TextMessage.TextColor3 = Color3.new(1, 1, 1)
+		TextMessage.Position = UDim2.new(0.5, 0, 1, 20)
+		TextMessage.TextStrokeColor3 = Color3.fromRGB(0,0,0)
+		TextMessage.Parent = ImageLabel
+		TextMessage.Visible = isblatant()
+		for i = 1, 0, -0.1 do 
+			wait(0.05)
+			ImageLabel.ImageTransparency = i
+		end
+		task.wait(0.2)
+		TextMessage.Text = "Loading dependencies..."
+		task.wait(1)
+		TextMessage.Text = "Loading tables..."
+		task.wait(3)
+		TextMessage:Remove()
+		ImageLabel:Remove()
+		local kavo = loadstring(GetURL("Libraries/kavo.lua"))()
+		local window = kavo.CreateLib("Noboline v1.6.2"..(shared.VapePrivate and " - PRIVATE" or ""), "Ocean")
+		local realgui = game:GetService("CoreGui")[debug.getupvalue(kavo.ToggleUI, 1)]
+		if not is_sirhurt_closure and syn and syn.protect_gui then
+			syn.protect_gui(realgui)
+		elseif gethui then
+			realgui.Parent = gethui()
+		end
+		fakeuiconnection = uis.InputBegan:connect(function(input1)
+			if bettergetfocus() == nil then
+				if input1.KeyCode == Enum.KeyCode[GuiLibrary["GUIKeybind"]] and GuiLibrary["KeybindCaptured"] == false then
+					realgui.Enabled = not realgui.Enabled
+					uis.OverrideMouseIconBehavior = (realgui.Enabled and Enum.OverrideMouseIconBehavior.ForceShow or game:GetService("VRService").VREnabled and Enum.OverrideMouseIconBehavior.ForceHide or Enum.OverrideMouseIconBehavior.None)
+				end
+			end
+		end)
+		realgui.Enabled = isblatant()
+		game.CoreGui.ChildRemoved:connect(function(obj)
+			if obj == realgui then
+				GuiLibrary["SelfDestruct"]()
+			end
+		end)
+		local windowtabs = {
+			Combat = window:NewTab("Combat"),
+			Blatant = window:NewTab("Blatant"),
+			Render = window:NewTab("Render"),
+			Utility = window:NewTab("Utility"),
+			World = window:NewTab("World")
+		}
+		local windowsections = {}
+		local tab = {}
+		local tab2 = {}
+		for i,v in pairs(GuiLibrary["ObjectsThatCanBeSaved"]) do 
+			if v.Type == "OptionsButton" then
+				table.insert(tab, v)
+			end
+			if v.Type == "Toggle" then
+				table.insert(tab2, v)
+			end
+			if v.Type == "Slider" then
+				table.insert(tab2, v)
+			end
+			if v.Type == "Dropdown" then
+				table.insert(tab2, v)
+			end
+			if v.Type == "ColorSlider" then
+				table.insert(tab2, v)
+			end
+		end
+		table.sort(tab, function(a, b) 
+			if a.Type ~= "OptionsButton" then
+				a = {Object = {Name = tostring(a["Object"].Parent):gsub("Children", "")..a["Object"].Name}}
+			else
+				a = {Object = {Name = a["Object"].Name}}
+			end
+			if b.Type ~= "OptionsButton" then
+				b = {Object = {Name = tostring(b["Object"].Parent):gsub("Children", "")..b["Object"].Name}}
+			else
+				b = {Object = {Name = b["Object"].Name}}
+			end
+			return a["Object"].Name:lower() < b["Object"].Name:lower() 
+		end)
+		table.sort(tab2, function(a, b) 
+			a = {Object = {Name = tostring(a["Object"].Parent):gsub("Children", "")..a["Object"].Name}}
+			b = {Object = {Name = tostring(b["Object"].Parent):gsub("Children", "")..b["Object"].Name}}
+			return a["Object"].Name:lower() < b["Object"].Name:lower() 
+		end)
+		for i,v in pairs(tab) do 
+			if v.Type == "OptionsButton" then 
+				local old = v["Api"]["ToggleButton"]
+				local newstr = tostring(v["Object"]):gsub("Button", "")
+				windowsections[newstr] = windowtabs[tostring(v["Object"].Parent.Parent)]:NewSection(newstr)
+				local tog = windowsections[newstr]:NewToggle(newstr, "", function(callback)
+					if callback ~= v["Api"]["Enabled"] then
+						old(true)
+					end
+				end)
+				local keybind = windowsections[newstr]:NewKeybind("Keybind", "", {Name = v["Api"]["Keybind"] ~= "" and v["Api"]["Keybind"] or "None"}, function(key)
+					GuiLibrary["KeybindCaptured"] = true
+					v["Api"]["SetKeybind"](key == "None" and "" or key)
+					task.delay(0.1, function() GuiLibrary["KeybindCaptured"] = false end)
+				end)
+				v["Api"]["ToggleButton"] = function(clicked, toggle)
+					local res = old(clicked, toggle)
+					tog:UpdateToggle(tostring(v["Object"]):gsub("Button", ""), v["Api"]["Enabled"])
+					return res
+				end
+				tog:UpdateToggle(tostring(v["Object"]):gsub("Button", ""), v["Api"]["Enabled"])
+			end
+		end
+		for i,v in pairs(tab2) do 
+			if v.Type == "Toggle" and tostring(v["Object"].Parent.Parent.Parent) ~= "ClickGui" and GuiLibrary["ObjectsThatCanBeSaved"][tostring(v["Object"].Parent):gsub("Children", "OptionsButton")] and GuiLibrary["ObjectsThatCanBeSaved"][tostring(v["Object"].Parent):gsub("Children", "OptionsButton")]["ChildrenObject"] == v["Object"].Parent then
+				local newstr = tostring(v["Object"].Parent):gsub("Children", "")
+				local old = v["Api"]["ToggleButton"]
+				local tog = windowsections[newstr]:NewToggle(tostring(v["Object"]):gsub("Button", ""), "", function(callback)
+					if callback ~= v["Api"]["Enabled"] then
+						old(true)
+					end
+				end)
+				v["Api"]["ToggleButton"] = function(clicked, toggle)
+					local res = old(clicked, toggle)
+					tog:UpdateToggle(tostring(v["Object"]):gsub("Button", ""), v["Api"]["Enabled"])
+					return res
+				end
+				tog:UpdateToggle(tostring(v["Object"]):gsub("Button", ""), v["Api"]["Enabled"])
+			end
+			if v.Type == "Slider" and GuiLibrary["ObjectsThatCanBeSaved"][tostring(v["Object"].Parent):gsub("Children", "OptionsButton")] and GuiLibrary["ObjectsThatCanBeSaved"][tostring(v["Object"].Parent):gsub("Children", "OptionsButton")]["ChildrenObject"] == v["Object"].Parent then
+				local newstr = tostring(v["Object"].Parent):gsub("Children", "")
+				local old = v["Api"]["SetValue"]
+				local slider = windowsections[newstr]:NewSlider(v["Object"].Name, "", v["Api"]["Max"], v["Api"]["Min"], function(s) -- 500 (MaxValue) | 0 (MinValue)
+					if s ~= v["Api"]["Value"] then
+						old(s)
+					end
+				end)
+				v["Api"]["SetValue"] = function(value, ...)
+					local res = old(value, ...)
+					slider:UpdateSlider(value)
+					return res
+				end
+				v["Api"]["SetValue"](tonumber(v["Api"]["Value"]))
+			end
+			if v.Type == "ColorSlider" and GuiLibrary["ObjectsThatCanBeSaved"][tostring(v["Object"].Parent):gsub("Children", "OptionsButton")] and GuiLibrary["ObjectsThatCanBeSaved"][tostring(v["Object"].Parent):gsub("Children", "OptionsButton")]["ChildrenObject"] == v["Object"].Parent then
+				local newstr = tostring(v["Object"].Parent):gsub("Children", "")
+				local old = v["Api"]["SetValue"]
+				v["Api"]["RainbowValue"] = false
+				local slider = windowsections[newstr]:NewColorPicker(v["Object"].Name, "", Color3.fromHSV(v["Api"]["Hue"], v["Api"]["Sat"], v["Api"]["Value"]), function(col) -- 500 (MaxValue) | 0 (MinValue)
+					old(col:ToHSV())
+				end)
+				--v["Api"]["SetValue"](v["Api"]["Hue"], v["Api"]["Sat"], v["Api"]["Value"])
+			end
+			if v.Type == "Dropdown" and GuiLibrary["ObjectsThatCanBeSaved"][tostring(v["Object"].Parent):gsub("Children", "OptionsButton")] and GuiLibrary["ObjectsThatCanBeSaved"][tostring(v["Object"].Parent):gsub("Children", "OptionsButton")]["ChildrenObject"] == v["Object"].Parent then
+				local newstr = tostring(v["Object"].Parent):gsub("Children", "")
+				local old = v["Api"]["SetValue"]
+				local dropdown = windowsections[newstr]:NewDropdown(v["Object"].Name, "", debug.getupvalue(v["Api"]["SetValue"], 4)["List"], function(currentOption)
+					if currentOption ~= v["Api"]["Value"] then
+						v["Api"]["SetValue"](currentOption)
+					end
+				end)
+				dropdown:SetValue(v["Api"]["Value"])
+				--v["Api"]["SetValue"](v["Api"]["Hue"], v["Api"]["Sat"], v["Api"]["Value"])
+			end
+		end
+		--windowsections.Combat:NewToggle("a", "", function(callback)
+	--		print(callback, "yes")
+		--end)
+	end)
+end
+
+runcode(function()
+	local dumbassgame
+	local remote = bedwars["ClientHandler"]:Get(bedwars["PickupRemote"])
+		local diedumbass = {["Enabled"] = false}
+		diedumbass = GuiLibrary["ObjectsThatCanBeSaved"]["WorldWindow"]["Api"].CreateOptionsButton({
+			["Name"] = "LobbyRuiner",
+			["Function"] = function(callback)
+				if callback then
+					game:GetService("NetworkClient"):SetOutgoingKBPSLimit(math.huge)
+                  task.spawn(function()
+					if not dumbassgame then
+						dumbassgame = {}
+						local lasttbl
+						for i = 1,45000 do
+							dumbassgame[#dumbassgame+1] = (lasttbl or {})
+							lasttbl = dumbassgame[#dumbassgame]
+						end
+					end
+					repeat
+						task.wait(0.3)
+						task.spawn(function()
+							pcall(function() remote:CallServer(dumbassgame) end)
+						end)
+				until (not diedumbass["Enabled"])
+			end)
+		end
+	end
+})
