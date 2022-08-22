@@ -211,36 +211,36 @@ GUI.CreateButton({
 	["IconSize"] = 15
 })
 GUI.CreateButton({
-	["Name"] = "Blatant", 
+	["Name"] = "Danger", 
 	["Function"] = function(callback) Blatant.SetVisible(callback) end, 
 	["Icon"] = "vape/assets/BlatantIcon.png", 
 	["IconSize"] = 16
 })
 GUI.CreateButton({
-	["Name"] = "Render", 
+	["Name"] = "Viewable", 
 	["Function"] = function(callback) Render.SetVisible(callback) end, 
 	["Icon"] = "vape/assets/RenderIcon.png", 
 	["IconSize"] = 17
 })
 GUI.CreateButton({
-	["Name"] = "Utility", 
+	["Name"] = "Usefull", 
 	["Function"] = function(callback) Utility.SetVisible(callback) end, 
 	["Icon"] = "vape/assets/UtilityIcon.png", 
 	["IconSize"] = 17
 })
 GUI.CreateButton({
-	["Name"] = "World", 
+	["Name"] = "Global", 
 	["Function"] = function(callback) World.SetVisible(callback) end, 
 	["Icon"] = "vape/assets/WorldIcon.png", 
 	["IconSize"] = 16
 })
 GUI.CreateDivider("MISC")
 GUI.CreateButton({
-	["Name"] = "Friends", 
+	["Name"] = "Allies", 
 	["Function"] = function(callback) Friends.SetVisible(callback) end, 
 })
 GUI.CreateButton({
-	["Name"] = "Profiles", 
+	["Name"] = "Settings", 
 	["Function"] = function(callback) Profiles.SetVisible(callback) end, 
 })
 local FriendsTextList = {["RefreshValues"] = function() end}
