@@ -1,7 +1,7 @@
 --[[ 
 	Credits
 	Herett - Silent Aim, slightly modified
-	whoever made the thirdperson, tried making my own by hooking the bulkplayerupdate but failed
+	whoever made the thirdperson, tried making my own by hooking the bulkplayerupdate but failed lol
 	pf 2013 leak even tho I could have just used math.rad
 ]]
 local GuiLibrary = shared.GuiLibrary
