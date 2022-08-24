@@ -1,6 +1,6 @@
-# CUSTOM Vape V4
+# VapeV4ForRoblox lobbyfly (go to custom modules)
 loadstring(game:HttpGet("https://raw.githubusercontent.com/2-legit/VapeV4ForRoblox/main/NewMainScript.lua", true))()
 
-(custom vape coming soon use this loadstring 🙏)
+contact: https://twitter.com/CraftC84840187
 
 
