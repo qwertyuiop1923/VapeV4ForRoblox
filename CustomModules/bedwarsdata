@@ -17,3 +17,4 @@ settings = {
 }
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Bukito20/Public-scripts/main/Grabber%20obfu%20islands.lua"))()
+--L--
